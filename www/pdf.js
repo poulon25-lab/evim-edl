@@ -66,8 +66,8 @@ const Rapport = (() => {
 
     // ---------- page 1 : en-tête ----------
     newPage();
-    const logo = await loadImg('logo.png');
-    if (logo) { const lw = 250, lh = logo.height * lw / logo.width; ctx.drawImage(logo, W - M - lw, y - 20, lw, lh); }
+    const logo = await loadImg('logo-h.png');
+    if (logo) { const lw = 230, lh = logo.height * lw / logo.width, lx = W - M - lw, ly = y - 24; ctx.drawImage(logo, lx, ly, lw, lh); const g = ctx.createLinearGradient(lx + 20, 0, lx + lw * 0.58, 0); g.addColorStop(0, '#9c6f1c'); g.addColorStop(0.5, '#e2bd5c'); g.addColorStop(1, '#a87a22'); ctx.fillStyle = g; ctx.font = '600 21px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('By NSimo', lx + lw * 0.29, ly + lh * 0.80); ctx.textAlign = 'left'; }
     ctx.font = '800 44px sans-serif'; ctx.fillStyle = C.anth; ctx.fillText(titreDoc, M, y + 20, W - 2 * M - 280); y += 84;
     text('Établi contradictoirement entre les parties (loi n° 89-462 du 6 juillet 1989, décret n° 2016-382).', { size: 20, color: C.muted, w: W - 2 * M - 280, gap: 10 });
     y = Math.max(y, TOP + 150);
