@@ -5,22 +5,25 @@ const Gemini = (() => {
   async function call(parts) {
     const cfg = await Backend.getConfig().catch(() => ({}));
     const key = cfg.geminiKey || '';
-    const model = cfg.model || 'gemini-2.5-flash';
     if (!key) throw new Error("L'IA n'est pas encore configurée : l'administrateur doit ajouter la clé Gemini dans Mon compte.");
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts }],
-        generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
-      })
-    });
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) {
+    // modèle choisi, puis modèles de secours si Google est saturé ou si le modèle a été retiré
+    const modeles = [...new Set([cfg.model || 'gemini-3.5-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-flash-lite-latest'])];
+    let data, derniereErreur;
+    for (const model of modeles) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json' } })
+      });
+      data = await resp.json().catch(() => ({}));
+      if (resp.ok) { derniereErreur = null; break; }
       const msg = data.error && data.error.message ? data.error.message : ('Erreur HTTP ' + resp.status);
-      throw new Error('Gemini : ' + msg);
+      derniereErreur = msg;
+      const passer = [429, 500, 503, 404].includes(resp.status) || /demand|overloaded|no longer available|not found/i.test(msg);
+      if (!passer) break;
     }
+    if (derniereErreur) throw new Error(/demand|overloaded|quota|429/i.test(derniereErreur) ? "L'IA de Google est très demandée en ce moment, réessaie dans une minute." : 'Gemini : ' + derniereErreur);
     const txt = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
     if (!txt) throw new Error("Gemini n'a pas renvoyé de réponse (photo refusée ou vide).");
     try { return JSON.parse(txt.replace(/^```json\s*|```\s*$/g, '')); }
