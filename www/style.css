@@ -215,6 +215,14 @@ textarea{min-height:70px;resize:vertical}
 .switch input:checked+span{background:var(--teal)}
 .switch input:checked+span::before{transform:translateX(18px)}
 
+/* ---------- logo evim + By NSimo (or) ---------- */
+.brand{display:flex;flex-direction:column;align-items:center;width:var(--w,190px);max-width:100%;margin:0 auto}
+.brand img{width:100%;height:auto;display:block}
+.brand .by{align-self:flex-start;width:58%;text-align:center;margin-top:calc(var(--w,190px) * -0.115);font:500 calc(var(--w,190px) * 0.082) 'Poppins',system-ui,sans-serif;letter-spacing:.05em;line-height:1.1;background:linear-gradient(120deg,#9c6f1c 0%,#d4a845 35%,#f0d488 52%,#c99a35 72%,#a87a22 100%);-webkit-background-clip:text;background-clip:text;color:#c49a3a;-webkit-text-fill-color:transparent}
+.brand .by b{font-weight:700}
+#sidebar .brand{margin:4px auto 26px}
+.auth-card .brand{margin:0 auto 18px}
+.boot .brand{margin-bottom:4px}
 /* ---------- divers ---------- */
 #toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#24292e;color:#fff;padding:12px 18px;border-radius:12px;z-index:60;max-width:92%;font-size:14px;box-shadow:var(--sh-l);text-align:center}
 @media (min-width:920px){#toast{bottom:28px}}
