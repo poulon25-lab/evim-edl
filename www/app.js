@@ -186,7 +186,7 @@ async function showAuth(mode = 'login') {
   if (premier) mode = 'signup';
   const demo = Backend.mode === 'demo';
   a.innerHTML = `<div class="auth-card">
-    <img class="logo" src="logo.png" alt="evim immobilier — By NSimo">
+    <div class="brand" style="--w:200px"><img src="logo-h.png" alt="evim immobilier"><div class="by">By <b>NSimo</b></div></div>
     ${demo ? `<div class="demo">Mode démo : comptes et données restent sur cet appareil. Branche Firebase pour la version en ligne.</div>` : ''}
     ${mode === 'reset' ? `
       <h1>Mot de passe oublié</h1><p class="lead">Reçois un lien de réinitialisation par email.</p>
@@ -656,7 +656,7 @@ async function viewAccount() {
   <div class="card"><div class="card-h"><div><h2>Sauvegarde</h2><div class="sub">${Backend.mode === 'demo' ? 'En mode démo, les données restent sur cet appareil.' : 'Tes données sont déjà sauvegardées en ligne.'}</div></div></div>
     <div class="btns" style="margin-top:0"><button class="btn ghost" id="export">${I('download')} Exporter</button><button class="btn ghost" id="import">${I('upload')} Importer</button></div></div>
   <div class="btns"><button class="btn danger" id="logout">${I('logout')} Se déconnecter</button></div>
-  <div style="text-align:center;margin-top:26px"><img src="logo.png" alt="" style="width:130px"><div class="xs muted">État des Lieux IA · v${VERSION}</div></div>`;
+  <div style="text-align:center;margin-top:26px"><div class="brand" style="--w:130px"><img src="logo-h.png" alt="evim immobilier"><div class="by">By <b>NSimo</b></div></div><div class="xs muted">État des Lieux IA · v${VERSION}</div></div>`;
   $('#save-nom').onclick = async () => { const n = $('#nom').value.trim(); if (!n) return; try { await Backend.updateProfile({ nom: n }); renderNav(); toast('Profil mis à jour'); render(); } catch (e) { toast(e.message, 5000); } };
   const rs = $('#reset'); if (rs) rs.onclick = async () => { try { await Backend.resetPassword(u.email); toast('Email de changement de mot de passe envoyé à ' + u.email, 5000); } catch (e) { toast(e.message, 5000); } };
   if (isAdmin()) {
@@ -719,6 +719,6 @@ async function partagerFichier(bytes, nom, mime) {
   const Cap = window.Capacitor;
   if (Cap && Cap.Plugins && Cap.Plugins.App) Cap.Plugins.App.addListener('backButton', () => { if (!back()) Cap.Plugins.App.exitApp(); });
   try { await Backend.init(); }
-  catch (e) { console.error(e); $('#boot').innerHTML = `<img src="logo.png" alt=""><div class="err" style="max-width:360px">Impossible de joindre le serveur. Vérifie ta connexion internet puis relance l'application.<br><small>${esc(e.message)}</small></div><button class="btn" onclick="location.reload()">Réessayer</button>`; return; }
+  catch (e) { console.error(e); $('#boot').innerHTML = `<div class="brand" style="--w:180px"><img src="logo-h.png" alt="evim immobilier"><div class="by">By <b>NSimo</b></div></div><div class="err" style="max-width:360px">Impossible de joindre le serveur. Vérifie ta connexion internet puis relance l'application.<br><small>${esc(e.message)}</small></div><button class="btn" onclick="location.reload()">Réessayer</button>`; return; }
   if (Backend.user && Backend.user.actif !== false) showApp(); else showAuth('login');
 })();
