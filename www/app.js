@@ -650,7 +650,7 @@ async function viewAccount() {
   ${isAdmin() ? `<div class="card"><div class="card-h"><div><h2>Intelligence artificielle</h2><div class="sub">Clé Gemini partagée par toute l'agence</div></div>${I('spark')}</div>
     <div class="xs muted">Crée une clé sur <b>aistudio.google.com</b> → « Get API key » avec ton compte Google.</div>
     <label class="f">Clé API Gemini</label><input type="password" id="key" value="${esc(cfg.geminiKey || '')}" placeholder="AIza…" autocomplete="off">
-    <label class="f">Modèle</label><input type="text" id="model" value="${esc(cfg.model || 'gemini-2.5-flash')}">
+    <label class="f">Modèle</label><input type="text" id="model" value="${esc(cfg.model || 'gemini-3.5-flash')}">
     <div class="btns"><button class="btn ghost" id="test">Tester</button><button class="btn" id="save-ia">Enregistrer</button></div></div>` : ''}
   </div>
   <div class="card"><div class="card-h"><div><h2>Sauvegarde</h2><div class="sub">${Backend.mode === 'demo' ? 'En mode démo, les données restent sur cet appareil.' : 'Tes données sont déjà sauvegardées en ligne.'}</div></div></div>
@@ -660,7 +660,7 @@ async function viewAccount() {
   $('#save-nom').onclick = async () => { const n = $('#nom').value.trim(); if (!n) return; try { await Backend.updateProfile({ nom: n }); renderNav(); toast('Profil mis à jour'); render(); } catch (e) { toast(e.message, 5000); } };
   const rs = $('#reset'); if (rs) rs.onclick = async () => { try { await Backend.resetPassword(u.email); toast('Email de changement de mot de passe envoyé à ' + u.email, 5000); } catch (e) { toast(e.message, 5000); } };
   if (isAdmin()) {
-    const sauver = () => Backend.setConfig({ geminiKey: $('#key').value.trim(), model: $('#model').value.trim() || 'gemini-2.5-flash' });
+    const sauver = () => Backend.setConfig({ geminiKey: $('#key').value.trim(), model: $('#model').value.trim() || 'gemini-3.5-flash' });
     $('#save-ia').onclick = async () => { try { await sauver(); toast('Configuration IA enregistrée ✓'); } catch (e) { toast(e.message, 5000); } };
     $('#test').onclick = async ev => { const b = ev.currentTarget; b.disabled = true; b.textContent = 'Test…'; try { await sauver(); await Gemini.tester(); toast('Connexion à Gemini OK ✓'); } catch (e) { toast(e.message, 5000); } b.disabled = false; b.textContent = 'Tester'; };
   }
