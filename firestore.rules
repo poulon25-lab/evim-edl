@@ -1,0 +1,69 @@
+rules_version = '2';
+// Règles de sécurité Firestore — État des Lieux IA (evim immobilier)
+// À coller dans Firebase > Firestore Database > Règles, puis « Publier ».
+// Remplace l'email ci-dessous si ton adresse administrateur est différente.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function adminEmail() { return 'TON_EMAIL@exemple.com'; }
+    function signedIn() { return request.auth != null; }
+    function userPath(uid) { return /databases/$(database)/documents/users/$(uid); }
+    function profil() { return get(userPath(request.auth.uid)).data; }
+    function membre() { return signedIn() && exists(userPath(request.auth.uid)) && profil().actif == true; }
+    function admin() { return membre() && profil().role == 'admin'; }
+    function invitePath(code) { return /databases/$(database)/documents/invites/$(code); }
+
+    // ---------- Profils agents ----------
+    match /users/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || admin());
+      allow list: if admin();
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.actif == true
+        && (
+          // compte administrateur (ton email)
+          (request.resource.data.role == 'admin' && request.auth.token.email == adminEmail())
+          ||
+          // compte agent : clé d'invitation valide, non utilisée, consommée dans la même opération
+          (request.resource.data.role == 'agent'
+            && exists(invitePath(request.resource.data.invite))
+            && get(invitePath(request.resource.data.invite)).data.used == false
+            && getAfter(invitePath(request.resource.data.invite)).data.usedBy == uid)
+        );
+      allow update: if admin()
+        || (request.auth.uid == uid && membre()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nom', 'telephone']));
+      allow delete: if admin();
+    }
+
+    // ---------- Clés d'invitation ----------
+    match /invites/{code} {
+      allow list, create, delete: if admin();
+      allow get: if admin();
+      allow update: if admin()
+        || (signedIn() && resource.data.used == false
+            && request.resource.data.used == true
+            && request.resource.data.usedBy == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedBy', 'usedEmail', 'usedAt'])
+            && getAfter(userPath(request.auth.uid)).data.invite == code);
+    }
+
+    // ---------- Configuration partagée (clé Gemini) ----------
+    match /config/{doc} {
+      allow read: if membre();
+      allow write: if admin();
+    }
+
+    // ---------- Données : chaque agent voit les siennes, l'admin voit tout ----------
+    match /{col}/{id} {
+      allow read: if (col == 'biens' || col == 'edls' || col == 'photos')
+        && membre() && (admin() || resource.data.owner == request.auth.uid);
+      allow create: if (col == 'biens' || col == 'edls' || col == 'photos')
+        && membre() && (admin() || request.resource.data.owner == request.auth.uid);
+      allow update: if (col == 'biens' || col == 'edls' || col == 'photos')
+        && membre() && (admin() || (resource.data.owner == request.auth.uid && request.resource.data.owner == request.auth.uid));
+      allow delete: if (col == 'biens' || col == 'edls' || col == 'photos')
+        && membre() && (admin() || resource.data.owner == request.auth.uid);
+    }
+  }
+}

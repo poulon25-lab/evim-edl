@@ -1,0 +1,10 @@
+{
+  "appId": "fr.etatdeslieux.ia",
+  "appName": "État des Lieux evim",
+  "webDir": "www",
+  "server": {
+    "url": "https://poulon25-lab.github.io/evim-edl/",
+    "errorPath": "offline.html"
+  },
+  "android": { "backgroundColor": "#ffffff" }
+}
